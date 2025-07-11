@@ -8,6 +8,7 @@ import org.springframework.data.mongodb.MongoTransactionManager;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.web.client.RestTemplate;
 
 @SpringBootApplication
 public class ExpenseSplitterAppApplication {
@@ -19,5 +20,10 @@ public class ExpenseSplitterAppApplication {
 	@Bean
 	public PlatformTransactionManager transactionManager(MongoDatabaseFactory dbFactory){
 		return new MongoTransactionManager(dbFactory);
+	}
+
+	@Bean
+	public RestTemplate restTemplate(){
+		return new RestTemplate();
 	}
 }
