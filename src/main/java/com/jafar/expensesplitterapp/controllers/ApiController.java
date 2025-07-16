@@ -1,7 +1,7 @@
 package com.jafar.expensesplitterapp.controllers;
 
-import com.jafar.expensesplitterapp.models.JokeAPI;
-import com.jafar.expensesplitterapp.models.LoveQuote;
+import com.jafar.expensesplitterapp.api.response.JokeApi;
+import com.jafar.expensesplitterapp.api.response.QuoteApi;
 import com.jafar.expensesplitterapp.models.User;
 import com.jafar.expensesplitterapp.service.ApiService;
 import com.jafar.expensesplitterapp.service.UserService;
@@ -35,7 +35,7 @@ public class ApiController {
     @GetMapping("joke")
     public ResponseEntity<?> getjoke(@AuthenticationPrincipal UserDetails userDetails){
         User user=userService.getByUserName(userDetails.getUsername()).orElseThrow(()-> new RuntimeException("User not found with name "+userDetails.getUsername()));
-        JokeAPI joke=apiService.getRandomJoke();
+        JokeApi joke=apiService.getRandomJoke();
         String haha="Hey "+user.getUserName()+" ! here is a joke for you \n"+joke.getSetup()+"😂😂 "+joke.getPunchline();
         return ResponseEntity.ok(haha);
     }
@@ -44,7 +44,7 @@ public class ApiController {
     @GetMapping("lovequote")
     public ResponseEntity<?> getRandomQoute(@AuthenticationPrincipal UserDetails userDetails){
         User user=userService.getByUserName(userDetails.getUsername()).orElseThrow(()-> new RuntimeException("User not found with name "+userDetails.getUsername()));
-        LoveQuote quote=apiService.getRandomLoveQuote();
+        QuoteApi quote=apiService.getRandomLoveQuote();
         String quoteForYou= "Hey "+user.getUserName()+"💖💖💖.Here is a beautiful qoute for you\n"+quote.getQuote();
         return ResponseEntity.ok(quoteForYou);
     }

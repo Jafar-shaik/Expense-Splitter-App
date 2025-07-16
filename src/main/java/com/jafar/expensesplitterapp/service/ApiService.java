@@ -1,8 +1,10 @@
 package com.jafar.expensesplitterapp.service;
 
-import com.jafar.expensesplitterapp.models.CurrencyResponse;
-import com.jafar.expensesplitterapp.models.JokeAPI;
-import com.jafar.expensesplitterapp.models.LoveQuote;
+import com.jafar.expensesplitterapp.api.response.CurrencyApi;
+import com.jafar.expensesplitterapp.api.response.JokeApi;
+import com.jafar.expensesplitterapp.api.response.QuoteApi;
+import com.jafar.expensesplitterapp.config.AppCache;
+import com.jafar.expensesplitterapp.constants.PlaceHolders;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -18,31 +20,33 @@ import org.springframework.http.HttpHeaders;
 public class ApiService {
     @Autowired
     private RestTemplate restTemplate;
+    @Autowired
+    private AppCache appCache;
 
     @Value("${api.ninjas.key}")
     private String apiKey;
-    @Value("${api.ninjas.url}")
-    private String apiUrl;
 
     public Double convertCurrency(String from , String to, double amount){
-        String  url= "https://api.frankfurter.app/latest?amount="+amount+"&from="+from+"&to="+to;
-        CurrencyResponse response=restTemplate.getForObject(url, CurrencyResponse.class);
+//       https://api.frankfurter.app/latest?amount=<amount>&from=<from>&to=<to>   --> this is stored in mongoDB as value
+//       String  url= "https://api.frankfurter.app/latest?amount="+amount+"&from="+from+"&to="+to;  --> the below line meaning
+        String url=appCache.appCache.get("currencyApi").replace(PlaceHolders.FROM,from).replace(PlaceHolders.TO,to).replace(PlaceHolders.AMOUNT,String.valueOf(amount));
+        CurrencyApi response=restTemplate.getForObject(url, CurrencyApi.class);
         return response.getRates().get(to);
     }
 
-    public JokeAPI getRandomJoke(){
-        String url="https://official-joke-api.appspot.com/random_joke";
-        return restTemplate.getForObject(url, JokeAPI.class);
+    public JokeApi getRandomJoke(){
+        String url=appCache.appCache.get("jokeApi");
+        return restTemplate.getForObject(url, JokeApi.class);
     }
 
-    // category=love is a premium-only feature on the API Ninjas service. So i removed the commented line in the below method
-    public LoveQuote getRandomLoveQuote(){
-//        String url = apiUrl + "?category=love";
+    public QuoteApi getRandomLoveQuote(){
+//        https://api.api-ninjas.com/v1/quotes   --> this is stored in mongoDB as value
         HttpHeaders httpHeaders=new HttpHeaders();
         httpHeaders.set("X-Api-Key",apiKey);
         HttpEntity<Void> entity=new HttpEntity<>(httpHeaders);
-        ResponseEntity<LoveQuote[]> response=restTemplate.exchange(apiUrl, HttpMethod.GET,entity,LoveQuote[].class);
-        LoveQuote[] quotes=response.getBody();
+        String url=appCache.appCache.get("quoteApi");
+        ResponseEntity<QuoteApi[]> response=restTemplate.exchange(url, HttpMethod.GET,entity, QuoteApi[].class);
+        QuoteApi[] quotes=response.getBody();
         if (quotes == null || quotes.length==0){
             throw  new RuntimeException("Quote is not generated ");
         }
